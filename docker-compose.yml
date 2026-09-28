@@ -16,6 +16,7 @@ services:
   api:
     image: sanagno/multi-server:latest
     environment:
+      - NODE_ENV=production
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
       - PGUSER=${PGUSER}
