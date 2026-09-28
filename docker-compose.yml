@@ -1,63 +1,33 @@
-version: '3'
+version: '3.8'
 services:
-  postgres:
-    image:  "postgres:latest"
-    environment:
-      - POSTGRES_PASSWORD=postgres_password
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=postgres
-
-  redis:
-    image: "redis:latest"
-
-  # Οι συνδεσεις γινονται στον Server αυτες απο κατω
-  backend:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./server
-    volumes:
-      - /app/node_modules
-      - ./server:/app
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - PGUSER=postgres
-      - PGHOST=postgres
-      - PGDATABASE=postgres
-      - PGPASSWORD=postgres_password
-      - PGPORT=5432
+  nginx:
+    image: sanagno/multi-nginx:latest
+    ports:
+      - "80:80"
     depends_on:
-      - postgres
-      - redis
-      
+      - client
+      - api
+    restart: always
 
   client:
-    build: 
-      dockerfile: Dockerfile.dev
-      context: ./client
-    volumes:
-      - /app/node_modules
-      - ./client:/app
-    environment:
-      - WDS_SOCKET_PORT=4000
-    
-  worker:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./worker
-    volumes:
-      - /app/node_modules
-      - ./worker:/app
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - redis
-
-  nginx:
-    build: 
-      dockerfile: Dockerfile.dev
-      context: ./nginx
+    image: sanagno/multi-client:latest
     restart: always
-    ports:
-      - "4000:80"
+
+  api:
+    image: sanagno/multi-server:latest
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - PGUSER=${PGUSER}
+      - PGHOST=${PGHOST}
+      - PGDATABASE=${PGDATABASE}
+      - PGPASSWORD=${PGPASSWORD}
+      - PGPORT=${PGPORT}
+    restart: always
+
+  worker:
+    image: sanagno/multi-worker:latest
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    restart: always
