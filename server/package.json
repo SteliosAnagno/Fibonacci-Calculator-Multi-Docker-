@@ -10,7 +10,7 @@
         "body-parser": "2.3.0"
     },
     "scripts": {
-        "dev": "NODE_ENV=developpment nodemon",
-        "start": "NODE_ENV=production index.js"
+        "start": "node index.js",
+        "dev": "nodemon"
     }
 }
